@@ -80,7 +80,8 @@ const registerNamespace = (namespace) => {
 export const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: '*',
+      origin: true,
+      credentials: true,
       methods: ['GET', 'POST']
     }
   });
