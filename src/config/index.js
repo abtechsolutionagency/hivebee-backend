@@ -1,1 +1,1 @@
-//Hello World
+export { env } from './env.js';

@@ -1,1 +1,6 @@
-//Hello World
+export default {
+  semi: true,
+  singleQuote: true,
+  trailingComma: 'none',
+  printWidth: 100
+};

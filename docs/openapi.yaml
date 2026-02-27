@@ -1,1 +1,97 @@
-//Hello World
+openapi: 3.0.3
+info:
+  title: joinTheHive Backend API
+  version: 1.1.0
+servers:
+  - url: http://localhost:9999/api
+paths:
+  /v1/health:
+    get:
+      summary: Health check
+      responses:
+        '200':
+          description: Service is healthy
+  /v1/users/register:
+    post:
+      summary: Register primary user (king/queen)
+      responses:
+        '201':
+          description: User registered
+  /v1/users/login:
+    post:
+      summary: Login user
+      responses:
+        '200':
+          description: Login successful
+  /v1/users/verify-email:
+    post:
+      summary: Verify primary user email by token
+      responses:
+        '200':
+          description: Email verified
+  /v1/users/me/verify-email/resend:
+    post:
+      summary: Resend primary verification email
+      responses:
+        '200':
+          description: Verification email sent
+  /v1/users/me/primary-profile:
+    patch:
+      summary: Complete or update primary profile
+      responses:
+        '200':
+          description: Primary profile updated
+  /v1/users/me/subscription/checkout:
+    post:
+      summary: Create Stripe monthly subscription checkout session
+      responses:
+        '200':
+          description: Checkout created
+  /v1/users/me/subscription:
+    get:
+      summary: Get primary user subscription details and recent invoices
+      responses:
+        '200':
+          description: Subscription details fetched
+  /v1/users/me/subscription/billing-portal:
+    post:
+      summary: Create Stripe billing portal session
+      responses:
+        '200':
+          description: Billing portal created
+  /v1/users/me/subscription/cancel:
+    post:
+      summary: Cancel subscription at period end
+      responses:
+        '200':
+          description: Subscription cancellation scheduled
+  /v1/users/me/subscription/resume:
+    post:
+      summary: Resume subscription by removing period-end cancel
+      responses:
+        '200':
+          description: Subscription resumed
+  /v1/users/me/worker-invites:
+    post:
+      summary: Invite worker bee (plan-limited)
+      responses:
+        '201':
+          description: Worker invite created
+  /v1/users/worker-signup:
+    post:
+      summary: Worker bee signup with invite code
+      responses:
+        '201':
+          description: Worker account created
+  /v1/users/subscription/plans:
+    get:
+      summary: List subscription plans with pricing and limits
+      responses:
+        '200':
+          description: Plans fetched
+  /v1/users/me/subscription/change-plan:
+    post:
+      summary: Upgrade or downgrade active subscription plan
+      responses:
+        '200':
+          description: Plan updated
