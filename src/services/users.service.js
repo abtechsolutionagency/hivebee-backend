@@ -235,7 +235,7 @@ export const usersService = {
     });
 
     const userObject = user.toObject();
-    await mailService.sendPrimaryVerificationEmail({
+    void mailService.sendPrimaryVerificationEmail({
       email: userObject.email,
       name: userObject.name ?? userObject.username,
       verificationLink: buildVerificationLink(rawToken),
@@ -720,7 +720,7 @@ export const usersService = {
     const inviteLink = `${env.appBaseUrl}/worker-signup?code=${code}`;
 
     if (payload.inviteeEmail) {
-      await mailService.sendWorkerInviteEmail({
+      void mailService.sendWorkerInviteEmail({
         toEmail: payload.inviteeEmail,
         primaryName: authUser.name ?? authUser.username,
         inviteLink,
