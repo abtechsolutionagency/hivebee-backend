@@ -16,6 +16,7 @@ import {
 import { normalizePlanCode } from '../constants/subscription-plans.js';
 import { mailService } from './mail.service.js';
 import { notificationsService } from './notifications.service.js';
+import { s3Service } from './s3.service.js';
 
 const stripe = env.stripeSecretKey ? new Stripe(env.stripeSecretKey) : null;
 
@@ -300,6 +301,49 @@ export const usersService = {
     }
 
     const updated = await usersRepository.updateById(id, payload);
+    return ensureFound(updated);
+  },
+
+  async uploadPicture(userId, fileBuffer, mimeType) {
+    if (!s3Service.isConfigured()) {
+      throw new AppError('Picture upload is not configured', 503, ERROR_CODES.INTERNAL_ERROR);
+    }
+
+    const validation = s3Service.validateFile(fileBuffer, mimeType);
+    if (!validation.valid) {
+      throw new AppError(validation.error, 400, ERROR_CODES.VALIDATION_ERROR);
+    }
+
+    const url = await s3Service.uploadPicture(userId.toString(), fileBuffer, mimeType, 'uploads');
+    return { url };
+  },
+
+  async uploadProfilePicture(userId, fileBuffer, mimeType) {
+    ensurePrimary(await ensureFound(await usersRepository.findById(userId)));
+
+    if (!s3Service.isConfigured()) {
+      throw new AppError('Profile picture upload is not configured', 503, ERROR_CODES.INTERNAL_ERROR);
+    }
+
+    const validation = s3Service.validateFile(fileBuffer, mimeType);
+    if (!validation.valid) {
+      throw new AppError(validation.error, 400, ERROR_CODES.VALIDATION_ERROR);
+    }
+
+    const pictureUrl = await s3Service.uploadProfilePicture(
+      userId.toString(),
+      fileBuffer,
+      mimeType
+    );
+
+    const existing = await usersRepository.findById(userId);
+    const mergedProfile = {
+      ...(existing.primaryProfile || {}),
+      picture: pictureUrl
+    };
+    const updated = await usersRepository.updateById(userId, {
+      primaryProfile: mergedProfile
+    });
     return ensureFound(updated);
   },
 

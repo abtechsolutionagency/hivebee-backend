@@ -84,6 +84,30 @@ export const usersController = {
     return ok(res, user, 'Primary profile updated');
   }),
 
+  uploadPicture: asyncHandler(async (req, res) => {
+    if (!req.file || !req.file.buffer) {
+      throw new AppError('No file uploaded. Send a file with field name "picture".', 400, ERROR_CODES.VALIDATION_ERROR);
+    }
+    const data = await usersService.uploadPicture(
+      req.authUser._id,
+      req.file.buffer,
+      req.file.mimetype
+    );
+    return ok(res, data, 'Picture uploaded');
+  }),
+
+  uploadProfilePicture: asyncHandler(async (req, res) => {
+    if (!req.file || !req.file.buffer) {
+      throw new AppError('No file uploaded. Send a file with field name "picture".', 400, ERROR_CODES.VALIDATION_ERROR);
+    }
+    const user = await usersService.uploadProfilePicture(
+      req.authUser._id,
+      req.file.buffer,
+      req.file.mimetype
+    );
+    return ok(res, user, 'Profile picture updated');
+  }),
+
   createSubscriptionCheckout: asyncHandler(async (req, res) => {
     const payload = parseBody(createSubscriptionCheckoutSchema, req.body);
     const data = await usersService.createSubscriptionCheckoutSession(req.authUser, payload.plan);

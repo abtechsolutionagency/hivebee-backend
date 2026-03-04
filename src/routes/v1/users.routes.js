@@ -6,6 +6,7 @@ import {
   requirePrimaryUser,
   requireVerifiedEmail
 } from '../../middlewares/auth.js';
+import { uploadProfilePicture } from '../../middlewares/upload.js';
 import { usersController } from '../../controllers/users.controller.js';
 
 const usersRouter = Router();
@@ -23,12 +24,25 @@ usersRouter.post(
 );
 
 usersRouter.get('/me', requireAuth, usersController.me);
+
+// General picture upload – returns { url }; use this URL in profile, smile picture, or anywhere in the app
+usersRouter.post('/me/upload/picture', requireAuth, uploadProfilePicture, usersController.uploadPicture);
+
 usersRouter.patch(
   '/me/primary-profile',
   requireAuth,
   requirePrimaryUser,
   requireVerifiedEmail,
   usersController.updatePrimaryProfile
+);
+// Upload file and set as primary profile (smile) picture in one step
+usersRouter.post(
+  '/me/primary-profile/picture',
+  requireAuth,
+  requirePrimaryUser,
+  requireVerifiedEmail,
+  uploadProfilePicture,
+  usersController.uploadProfilePicture
 );
 usersRouter.post(
   '/me/subscription/checkout',

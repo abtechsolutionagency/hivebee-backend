@@ -48,7 +48,11 @@ export const env = {
   smtpConnectionTimeoutMs: toNumber(process.env.SMTP_CONNECTION_TIMEOUT_MS, 10_000),
   smtpGreetingTimeoutMs: toNumber(process.env.SMTP_GREETING_TIMEOUT_MS, 10_000),
   smtpSocketTimeoutMs: toNumber(process.env.SMTP_SOCKET_TIMEOUT_MS, 15_000),
-  emailFrom: process.env.EMAIL_FROM ?? 'no-reply@jointhehive.local'
+  emailFrom: process.env.EMAIL_FROM ?? 'no-reply@jointhehive.local',
+  awsRegion: process.env.AWS_S3_REGION ?? process.env.AWS_REGION ?? 'us-east-1',
+  awsS3Bucket: process.env.AWS_S3_BUCKET_NAME ?? process.env.AWS_S3_BUCKET ?? '',
+  awsAccessKeyId: process.env.AWS_ACCESS_KEY_ID ?? '',
+  awsSecretAccessKey: process.env.AWS_SECRET_ACCESS_KEY ?? ''
 };
 
 if (!env.mongodbUri) {

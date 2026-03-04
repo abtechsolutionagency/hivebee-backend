@@ -51,6 +51,7 @@ const primaryProfileSchema = new mongoose.Schema(
     workoutStyle: { type: String, trim: true, maxlength: 64 },
     eatingStyle: { type: String, trim: true, maxlength: 64 },
     aboutMe: { type: String, trim: true, maxlength: 500 },
+    picture: { type: String, trim: true },
     photos: { type: [String], default: [] },
     faithAndValues: { type: faithAndValuesSchema },
     lifestyle: { type: lifestyleSchema },
