@@ -30,10 +30,11 @@ const idealMatchSchema = new mongoose.Schema(
     faithPreferences: { type: [String], default: [] },
     familyGoalsPreferences: { type: [String], default: [] },
     heightPreference: { type: String, trim: true },
-    ethnicityPreference: { type: String, trim: true },
-    hairColorPreference: { type: String, trim: true },
-    fitnessPreference: { type: String, trim: true },
-    eatingHabitsPreference: { type: String, trim: true }
+    ethnicityPreference: { type: [String], default: [] },
+    hairColorPreference: { type: [String], default: [] },
+    eyeColorPreference: { type: [String], default: [] },
+    fitnessPreference: { type: [String], default: [] },
+    eatingHabitsPreference: { type: [String], default: [] }
   },
   { _id: false }
 );

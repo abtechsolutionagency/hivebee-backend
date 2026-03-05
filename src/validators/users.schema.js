@@ -10,18 +10,21 @@ const subscriptionPlanSchema = z.enum([
   'royal_hive'
 ]);
 const selectionList = (maxItems) => z.array(z.string().min(1).max(64)).max(maxItems);
+const flexibleStringList = z.array(z.string().trim().min(1)).max(50).optional();
+const flexibleString = () => z.string().trim().min(1).optional();
 
 const idealMatchBaseSchema = z.object({
   lookingFor: genderSchema.optional(),
   minAge: z.number().int().min(18).max(100).optional(),
   maxAge: z.number().int().min(18).max(100).optional(),
-  faithPreferences: selectionList(8).optional(),
-  familyGoalsPreferences: selectionList(6).optional(),
-  heightPreference: z.string().min(1).max(40).optional(),
-  ethnicityPreference: z.string().min(1).max(64).optional(),
-  hairColorPreference: z.string().min(1).max(32).optional(),
-  fitnessPreference: z.string().min(1).max(32).optional(),
-  eatingHabitsPreference: z.string().min(1).max(32).optional()
+  faithPreferences: flexibleStringList,
+  familyGoalsPreferences: flexibleStringList,
+  heightPreference: flexibleString(),
+  ethnicityPreference: flexibleStringList,
+  hairColorPreference: flexibleStringList,
+  eyeColorPreference: flexibleStringList,
+  fitnessPreference: flexibleStringList,
+  eatingHabitsPreference: flexibleStringList
 });
 
 const withAgeRangeCheck = (schema) =>
@@ -36,53 +39,53 @@ const withAgeRangeCheck = (schema) =>
   );
 
 const faithAndValuesSchema = z.object({
-  christianDenomination: z.string().min(1).max(64).optional(),
-  faithImportance: z.string().min(1).max(64).optional(),
-  coreValues: selectionList(6).optional(),
-  interests: selectionList(6).optional()
+  christianDenomination: z.string().trim().optional(),
+  faithImportance: z.string().trim().optional(),
+  coreValues: flexibleStringList,
+  interests: flexibleStringList
 });
 
 const lifestyleSchema = z.object({
-  wantsChildren: z.string().min(1).max(64).optional(),
-  marriageTimeline: z.string().min(1).max(64).optional(),
-  drinkingHabit: z.string().min(1).max(64).optional(),
-  smokingHabit: z.string().min(1).max(64).optional(),
-  exerciseFrequency: z.string().min(1).max(64).optional()
+  wantsChildren: z.string().trim().optional(),
+  marriageTimeline: z.string().trim().optional(),
+  drinkingHabit: z.string().trim().optional(),
+  smokingHabit: z.string().trim().optional(),
+  exerciseFrequency: z.string().trim().optional()
 });
 
 const primaryProfileRequiredSchema = z.object({
-  displayName: z.string().min(2).max(80),
+  displayName: z.string().trim().min(2),
   age: z.number().int().min(18).max(100),
   gender: genderSchema,
-  location: z.string().min(2).max(120),
-  occupation: z.string().max(80).optional(),
-  educationLevel: z.string().max(80).optional(),
-  height: z.string().max(40).optional(),
-  ethnicity: z.string().max(64).optional(),
-  workoutStyle: z.string().max(64).optional(),
-  eatingStyle: z.string().max(64).optional(),
-  aboutMe: z.string().max(500).optional(),
-  picture: z.string().url().max(2048).optional(),
-  photos: z.array(z.string().url()).max(6).optional(),
+  location: z.string().trim().min(2),
+  occupation: z.string().trim().optional(),
+  educationLevel: z.string().trim().optional(),
+  height: z.string().trim().optional(),
+  ethnicity: z.string().trim().optional(),
+  workoutStyle: z.string().trim().optional(),
+  eatingStyle: z.string().trim().optional(),
+  aboutMe: z.string().trim().optional(),
+  picture: z.string().url().optional(),
+  photos: z.array(z.string().url()).optional(),
   faithAndValues: faithAndValuesSchema.optional(),
   lifestyle: lifestyleSchema.optional(),
   idealMatch: withAgeRangeCheck(idealMatchBaseSchema).optional()
 });
 
 const primaryProfileUpdateSchema = z.object({
-  displayName: z.string().min(2).max(80).optional(),
+  displayName: z.string().trim().min(2).optional(),
   age: z.number().int().min(18).max(100).optional(),
   gender: genderSchema.optional(),
-  location: z.string().min(2).max(120).optional(),
-  occupation: z.string().max(80).optional(),
-  educationLevel: z.string().max(80).optional(),
-  height: z.string().max(40).optional(),
-  ethnicity: z.string().max(64).optional(),
-  workoutStyle: z.string().max(64).optional(),
-  eatingStyle: z.string().max(64).optional(),
-  aboutMe: z.string().max(500).optional(),
-  picture: z.string().url().max(2048).optional(),
-  photos: z.array(z.string().url()).max(6).optional(),
+  location: z.string().trim().min(2).optional(),
+  occupation: z.string().trim().optional(),
+  educationLevel: z.string().trim().optional(),
+  height: z.string().trim().optional(),
+  ethnicity: z.string().trim().optional(),
+  workoutStyle: z.string().trim().optional(),
+  eatingStyle: z.string().trim().optional(),
+  aboutMe: z.string().trim().optional(),
+  picture: z.string().url().optional(),
+  photos: z.array(z.string().url()).optional(),
   faithAndValues: faithAndValuesSchema.optional(),
   lifestyle: lifestyleSchema.optional(),
   idealMatch: withAgeRangeCheck(idealMatchBaseSchema).optional()
