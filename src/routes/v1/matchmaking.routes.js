@@ -12,6 +12,23 @@ import { matchmakingController } from '../../controllers/matchmaking.controller.
 const matchmakingRouter = Router();
 
 matchmakingRouter.get(
+  '/worker/dashboard',
+  requireAuth,
+  requireWorkerUser,
+  matchmakingController.workerDashboard
+);
+
+matchmakingRouter.get(
+  '/primary/search',
+  requireAuth,
+  requirePrimaryUser,
+  requireVerifiedEmail,
+  requireCompletedProfile,
+  requireActiveSubscription,
+  matchmakingController.primarySearchCandidates
+);
+
+matchmakingRouter.get(
   '/worker/candidates',
   requireAuth,
   requireWorkerUser,

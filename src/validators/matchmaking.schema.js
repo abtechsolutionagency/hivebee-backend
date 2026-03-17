@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 const decisionSchema = z.enum(['sweet', 'sting']);
 
-export const workerCandidateQuerySchema = z.object({
+const baseCandidateQuerySchema = z.object({
   page: z.coerce.number().int().min(1).optional(),
   limit: z.coerce.number().int().min(1).max(50).optional(),
   minAge: z.coerce.number().int().min(18).max(100).optional(),
@@ -11,6 +11,9 @@ export const workerCandidateQuerySchema = z.object({
   faith: z.string().min(1).max(64).optional(),
   search: z.string().min(1).max(80).optional()
 });
+
+export const workerCandidateQuerySchema = baseCandidateQuerySchema;
+export const primaryCandidateQuerySchema = baseCandidateQuerySchema;
 
 export const workerSubmissionSchema = z.object({
   candidateUserId: z.string().min(12).max(64),

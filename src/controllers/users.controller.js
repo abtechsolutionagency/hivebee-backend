@@ -62,6 +62,11 @@ export const usersController = {
     return ok(res, user);
   }),
 
+  primaryDashboard: asyncHandler(async (req, res) => {
+    const data = await usersService.getPrimaryDashboard(req.authUser);
+    return ok(res, data, 'Primary dashboard data fetched');
+  }),
+
   list: asyncHandler(async (_req, res) => {
     const users = await usersService.listUsers();
     return ok(res, users);

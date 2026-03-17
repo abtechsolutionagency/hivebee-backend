@@ -75,7 +75,82 @@ export const usersRepository = {
       .limit(limit)
       .lean();
   },
+  listCandidateProfilesForPrimary: ({ primaryUserId, allowedRoles, filters, skip, limit }) => {
+    const query = {
+      role: { $in: allowedRoles },
+      profileCompleted: true,
+      emailVerified: true,
+      _id: { $ne: toObjectId(primaryUserId) },
+      isActive: { $ne: false }
+    };
+
+    if (filters.minAge || filters.maxAge) {
+      query['primaryProfile.age'] = {};
+      if (filters.minAge) query['primaryProfile.age'].$gte = filters.minAge;
+      if (filters.maxAge) query['primaryProfile.age'].$lte = filters.maxAge;
+    }
+
+    if (filters.location) {
+      query['primaryProfile.location'] = { $regex: filters.location, $options: 'i' };
+    }
+
+    if (filters.faith) {
+      query['primaryProfile.faithAndValues.christianDenomination'] = {
+        $regex: filters.faith,
+        $options: 'i'
+      };
+    }
+
+    if (filters.search) {
+      query.$or = [
+        { name: { $regex: filters.search, $options: 'i' } },
+        { username: { $regex: filters.search, $options: 'i' } },
+        { 'primaryProfile.displayName': { $regex: filters.search, $options: 'i' } }
+      ];
+    }
+
+    return User.find(query)
+      .select('name username role primaryProfile.displayName primaryProfile.age primaryProfile.location primaryProfile.faithAndValues')
+      .sort({ 'subscription.searchPriorityWeight': -1, createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+  },
   countCandidateProfilesForWorker: ({ primaryUserId, allowedRoles, filters }) => {
+    const query = {
+      role: { $in: allowedRoles },
+      _id: { $ne: toObjectId(primaryUserId) },
+      isActive: { $ne: false }
+    };
+
+    if (filters.minAge || filters.maxAge) {
+      query['primaryProfile.age'] = {};
+      if (filters.minAge) query['primaryProfile.age'].$gte = filters.minAge;
+      if (filters.maxAge) query['primaryProfile.age'].$lte = filters.maxAge;
+    }
+
+    if (filters.location) {
+      query['primaryProfile.location'] = { $regex: filters.location, $options: 'i' };
+    }
+
+    if (filters.faith) {
+      query['primaryProfile.faithAndValues.christianDenomination'] = {
+        $regex: filters.faith,
+        $options: 'i'
+      };
+    }
+
+    if (filters.search) {
+      query.$or = [
+        { name: { $regex: filters.search, $options: 'i' } },
+        { username: { $regex: filters.search, $options: 'i' } },
+        { 'primaryProfile.displayName': { $regex: filters.search, $options: 'i' } }
+      ];
+    }
+
+    return User.countDocuments(query);
+  },
+  countCandidateProfilesForPrimary: ({ primaryUserId, allowedRoles, filters }) => {
     const query = {
       role: { $in: allowedRoles },
       _id: { $ne: toObjectId(primaryUserId) },

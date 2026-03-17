@@ -1,6 +1,7 @@
 import { asyncHandler } from '../utils/async-handler.js';
 import { created, ok } from '../utils/http-response.js';
 import {
+  primaryCandidateQuerySchema,
   primaryDecisionSchema,
   workerCandidateQuerySchema,
   workerSubmissionSchema
@@ -19,6 +20,20 @@ const parse = (schema, payload) => {
 };
 
 export const matchmakingController = {
+  primarySearchCandidates: asyncHandler(async (req, res) => {
+    const query = parse(primaryCandidateQuerySchema, req.query);
+    const data = await matchmakingService.listPrimarySearchCandidates(
+      req.authUser._id.toString(),
+      query
+    );
+    return ok(res, data, 'Candidates fetched');
+  }),
+
+  workerDashboard: asyncHandler(async (req, res) => {
+    const data = await matchmakingService.getWorkerDashboard(req.authUser._id.toString());
+    return ok(res, data, 'Worker dashboard data fetched');
+  }),
+
   workerListCandidates: asyncHandler(async (req, res) => {
     const query = parse(workerCandidateQuerySchema, req.query);
     const data = await matchmakingService.listWorkerCandidates(req.authUser._id.toString(), query);

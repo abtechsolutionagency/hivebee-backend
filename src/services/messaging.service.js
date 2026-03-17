@@ -66,7 +66,9 @@ export const messagingService = {
   },
 
   async listMessages(userId, connectionId, query) {
-    await ensureCanAccessConnection(userId, connectionId);
+    const connection = await ensureCanAccessConnection(userId, connectionId);
+
+    const otherUserId = connection.users.find((id) => id.toString() !== userId.toString());
 
     const limit = query.limit ?? 30;
     const filter = { connectionId };
@@ -74,13 +76,23 @@ export const messagingService = {
       filter.createdAt = { $lt: new Date(query.before) };
     }
 
-    const messages = await Message.find(filter)
-      .sort({ createdAt: -1 })
-      .limit(limit)
-      .populate('senderUserId', 'name username')
-      .lean();
+    const [messages, blockFromMe, blockFromOther] = await Promise.all([
+      Message.find(filter)
+        .sort({ createdAt: -1 })
+        .limit(limit)
+        .populate('senderUserId', 'name username')
+        .lean(),
+      UserBlock.findOne({ blockerUserId: userId, blockedUserId: otherUserId }).lean(),
+      UserBlock.findOne({ blockerUserId: otherUserId, blockedUserId: userId }).lean()
+    ]);
 
-    return messages.reverse();
+    return {
+      items: messages.reverse(),
+      blockStatus: {
+        blockedByMe: Boolean(blockFromMe),
+        blockedByOther: Boolean(blockFromOther)
+      }
+    };
   },
 
   async sendMessage(userId, connectionId, text) {
@@ -115,6 +127,17 @@ export const messagingService = {
   async blockUser(userId, targetUserId) {
     if (String(userId) === String(targetUserId)) {
       throw new AppError('Cannot block yourself', 400, ERROR_CODES.VALIDATION_ERROR);
+    }
+
+    const existing = await UserBlock.findOne({
+      blockerUserId: userId,
+      blockedUserId: targetUserId
+    }).lean();
+
+    // If current user has already blocked target, unblock (toggle).
+    if (existing) {
+      await UserBlock.deleteOne({ _id: existing._id });
+      return { blocked: false };
     }
 
     await UserBlock.updateOne(

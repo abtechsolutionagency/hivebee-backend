@@ -25,6 +25,14 @@ usersRouter.post(
 
 usersRouter.get('/me', requireAuth, usersController.me);
 
+usersRouter.get(
+  '/me/dashboard/primary',
+  requireAuth,
+  requirePrimaryUser,
+  requireVerifiedEmail,
+  usersController.primaryDashboard
+);
+
 // General picture upload – returns { url }; use this URL in profile, smile picture, or anywhere in the app
 usersRouter.post('/me/upload/picture', requireAuth, uploadProfilePicture, usersController.uploadPicture);
 

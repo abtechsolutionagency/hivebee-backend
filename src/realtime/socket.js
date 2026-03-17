@@ -63,6 +63,90 @@ const registerNamespace = (namespace) => {
     const userSockets = getUserSocketSet(userId);
     userSockets.add(socket.id);
 
+    socket.on('message:send', async (payload, callback) => {
+      try {
+        const { messagingService } = await import('../services/messaging.service.js');
+
+        if (!payload || typeof payload !== 'object') {
+          throw new Error('Invalid payload');
+        }
+
+        const { connectionId, text } = payload;
+        if (!connectionId || !text) {
+          throw new Error('connectionId and text are required');
+        }
+
+        const message = await messagingService.sendMessage(userId, connectionId, text);
+        if (typeof callback === 'function') {
+          callback({ ok: true, data: message });
+        }
+      } catch (err) {
+        if (typeof callback === 'function') {
+          callback({
+            ok: false,
+            error: err?.message ?? 'Failed to send message'
+          });
+        }
+      }
+    });
+
+    socket.on('typing:start', async (payload) => {
+      try {
+        const { messagingService } = await import('../services/messaging.service.js');
+
+        if (!payload || typeof payload !== 'object') {
+          return;
+        }
+
+        const { connectionId } = payload;
+        if (!connectionId) {
+          return;
+        }
+
+        const connections = await messagingService.listMyConnections(userId);
+
+        const target = connections.find((c) => String(c._id) === String(connectionId));
+        if (!target || !target.otherUser?._id) {
+          console.log('⚠️ ~ typing:start ~ no target connection/otherUser found');
+          return;
+        }
+
+        const otherUserId = String(target.otherUser._id);
+        emitToUser(otherUserId, 'typing', { connectionId, userId, isTyping: true });
+      } catch (err) {
+        console.log('⚠️ ~ typing:start ~ error:', err?.message || err);
+      }
+    });
+
+    socket.on('typing:stop', async (payload) => {
+      try {
+        const { messagingService } = await import('../services/messaging.service.js');
+
+        if (!payload || typeof payload !== 'object') {
+          return;
+        }
+
+        const { connectionId } = payload;
+        if (!connectionId) {
+          return;
+        }
+
+        const connections = await messagingService.listMyConnections(userId);
+
+        const target = connections.find((c) => String(c._id) === String(connectionId));
+        if (!target || !target.otherUser?._id) {
+          console.log('⚠️ ~ typing:stop ~ no target connection/otherUser found');
+          return;
+        }
+
+        const otherUserId = String(target.otherUser._id);
+        console.log('🚀 ~ typing:stop ~ emitting to otherUserId:', otherUserId);
+        emitToUser(otherUserId, 'typing', { connectionId, userId, isTyping: false });
+      } catch (err) {
+        console.log('⚠️ ~ typing:stop ~ error:', err?.message || err);
+      }
+    });
+
     socket.on('disconnect', () => {
       const set = socketsByUser.get(userId);
       if (!set) {
@@ -100,6 +184,7 @@ export const emitToUser = (userId, eventName, payload) => {
   }
 
   const sockets = socketsByUser.get(String(userId));
+  console.log("🚀 ~ emitToUser ~ sockets:", sockets)
   if (!sockets || sockets.size === 0) {
     return;
   }

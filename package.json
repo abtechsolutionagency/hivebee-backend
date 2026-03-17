@@ -6,7 +6,7 @@
   "main": "src/app/server.js",
   "scripts": {
     "start": "node --env-file-if-exists=.env src/app/server.js",
-    "dev": "node --watch --env-file-if-exists=.env src/app/server.js",
+    "dev": "nodemon --env-file=.env src/app/server.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
@@ -42,6 +42,7 @@
   "devDependencies": {
     "eslint": "^9.17.0",
     "globals": "^15.14.0",
+    "nodemon": "^3.1.14",
     "socket.io-client": "^4.8.1"
   }
 }

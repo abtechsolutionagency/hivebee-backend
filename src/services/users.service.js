@@ -17,6 +17,8 @@ import { normalizePlanCode } from '../constants/subscription-plans.js';
 import { mailService } from './mail.service.js';
 import { notificationsService } from './notifications.service.js';
 import { s3Service } from './s3.service.js';
+import { matchSubmissionsRepository } from '../repositories/match-submissions.repo.js';
+import { Connection } from '../models/connection.model.js';
 
 const stripe = env.stripeSecretKey ? new Stripe(env.stripeSecretKey) : null;
 
@@ -879,6 +881,52 @@ export const usersService = {
       usedSlots: workers.length,
       remainingSlots: Math.max(0, limit - workers.length),
       workers
+    };
+  },
+
+  async getPrimaryDashboard(authUser) {
+    ensurePrimary(authUser);
+
+    const primaryUserId = authUser._id.toString();
+
+    const [workerCount, pendingInvites, curatedFeed, mutualConnections, notifications] = await Promise.all([
+      usersRepository.countWorkersForPrimary(primaryUserId),
+      workerInvitesRepository.countPendingForPrimary(primaryUserId),
+      matchSubmissionsRepository.listPrimaryFeed(primaryUserId),
+      Connection.countDocuments({
+        users: primaryUserId,
+        messagingUnlocked: true
+      }),
+      // latest notifications (for small dashboard badge)
+      notificationsService.listForUser(primaryUserId)
+    ]);
+
+    const subscription = authUser.subscription || {};
+
+    return {
+      profile: {
+        completed: Boolean(authUser.profileCompleted),
+        status: authUser.profileCompleted ? 'done' : 'incomplete'
+      },
+      subscription: {
+        status: subscription.status ?? 'inactive',
+        plan: subscription.plan ?? null
+      },
+      workerBees: {
+        activeCount: workerCount
+      },
+      workerInvites: {
+        pendingCount: pendingInvites
+      },
+      curatedFeed: {
+        totalRecommendations: curatedFeed.length
+      },
+      mutualConnections: {
+        total: mutualConnections
+      },
+      notifications: {
+        unreadCount: notifications.filter((n) => !n.isRead).length
+      }
     };
   },
 

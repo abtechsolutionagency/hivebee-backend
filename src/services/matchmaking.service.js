@@ -66,7 +66,113 @@ const ensureMutualConnection = async (userAId, userBId) => {
   return { connection: connection.toObject(), created: true };
 };
 
+const resolvePrimarySearchContext = async (primaryUserId) => {
+  const primary = await usersRepository.findById(primaryUserId);
+  ensureFound(primary, 'Primary account not found');
+
+  if (!['king_bee', 'queen_bee'].includes(primary.role)) {
+    throw new AppError('Only primary accounts can perform this action', 403, ERROR_CODES.FORBIDDEN);
+  }
+
+  const allowedRoles = primary.role === 'king_bee' ? ['queen_bee'] : ['king_bee'];
+
+  return {
+    primaryUserId,
+    allowedRoles
+  };
+};
+
 export const matchmakingService = {
+  async getWorkerDashboard(workerUserId) {
+    const { primaryUserId, allowedRoles } = await resolveWorkerPrimaryContext(workerUserId);
+
+    const filters = {
+      minAge: undefined,
+      maxAge: undefined,
+      location: undefined,
+      faith: undefined,
+      search: undefined
+    };
+
+    const [candidateTotal, submissions] = await Promise.all([
+      usersRepository.countCandidateProfilesForWorker({ primaryUserId, allowedRoles, filters }),
+      matchSubmissionsRepository.listWorkerSubmissions(workerUserId)
+    ]);
+
+    const reviewedProfilesCount = submissions.length;
+    const sweetRecommendationsCount = submissions.filter(
+      (s) => s.workerDecision === 'sweet'
+    ).length;
+
+    let shareLinkInfo = null;
+    try {
+      shareLinkInfo = await matchmakingService.getWorkerPrimaryShareLink(workerUserId);
+    } catch {
+      shareLinkInfo = null;
+    }
+
+    return {
+      candidateDatabase: {
+        total: candidateTotal
+      },
+      reviewedProfiles: {
+        total: reviewedProfilesCount
+      },
+      sweetRecommendations: {
+        total: sweetRecommendationsCount
+      },
+      primaryShareLink: shareLinkInfo
+        ? {
+            available: true,
+            primaryUserId: shareLinkInfo.primaryUserId,
+            primaryName: shareLinkInfo.primaryName,
+            url: shareLinkInfo.profileShareLink
+          }
+        : {
+            available: false
+          }
+    };
+  },
+
+  async listPrimarySearchCandidates(primaryUserId, query) {
+    const { allowedRoles } = await resolvePrimarySearchContext(primaryUserId);
+
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 20;
+    const skip = (page - 1) * limit;
+
+    if (query.minAge && query.maxAge && query.minAge > query.maxAge) {
+      throw new AppError('minAge must be less than or equal to maxAge', 400, ERROR_CODES.VALIDATION_ERROR);
+    }
+
+    const filters = {
+      minAge: query.minAge,
+      maxAge: query.maxAge,
+      location: query.location,
+      faith: query.faith,
+      search: query.search
+    };
+
+    const [items, total] = await Promise.all([
+      usersRepository.listCandidateProfilesForPrimary({
+        primaryUserId,
+        allowedRoles,
+        filters,
+        skip,
+        limit
+      }),
+      usersRepository.countCandidateProfilesForPrimary({ primaryUserId, allowedRoles, filters })
+    ]);
+
+    return {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      items
+    };
+  },
+
   async listWorkerCandidates(workerUserId, query) {
     const { primaryUserId, allowedRoles } = await resolveWorkerPrimaryContext(workerUserId);
 
