@@ -141,6 +141,18 @@ export const changeSubscriptionPlanSchema = z.object({
   plan: subscriptionPlanSchema
 });
 
+export const generatePrimaryBioSchema = z.object({
+  displayName: z.string().trim().min(2).max(80),
+  age: z.number().int().min(18).max(100),
+  occupation: z.string().trim().min(1).max(80),
+  location: z.string().trim().max(120).optional(),
+  educationLevel: z.string().trim().max(80).optional()
+});
+
+export const polishPrimaryBioSchema = z.object({
+  bio: z.string().trim().min(10).max(500)
+});
+
 export const createUserSchema = z.object({
   username: z
     .string()

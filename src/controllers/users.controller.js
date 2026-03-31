@@ -5,7 +5,9 @@ import {
   createSubscriptionCheckoutSchema,
   createUserSchema,
   createWorkerInviteSchema,
+  generatePrimaryBioSchema,
   loginSchema,
+  polishPrimaryBioSchema,
   resendVerificationSchema,
   registerUserSchema,
   verifyEmailSchema,
@@ -87,6 +89,18 @@ export const usersController = {
     const payload = parseBody(updatePrimaryProfileSchema, req.body);
     const user = await usersService.updatePrimaryProfile(req.authUser._id, payload);
     return ok(res, user, 'Primary profile updated');
+  }),
+
+  generatePrimaryProfileBio: asyncHandler(async (req, res) => {
+    const payload = parseBody(generatePrimaryBioSchema, req.body);
+    const data = await usersService.generatePrimaryProfileBio(req.authUser, payload);
+    return ok(res, data, 'Bio generated');
+  }),
+
+  polishPrimaryProfileBio: asyncHandler(async (req, res) => {
+    const payload = parseBody(polishPrimaryBioSchema, req.body);
+    const data = await usersService.polishPrimaryProfileBio(req.authUser, payload);
+    return ok(res, data, 'Bio polished');
   }),
 
   uploadPicture: asyncHandler(async (req, res) => {

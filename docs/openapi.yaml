@@ -41,6 +41,18 @@ paths:
       responses:
         '200':
           description: Primary profile updated
+  /v1/users/me/primary-profile/bio/write:
+    post:
+      summary: Generate onboarding bio draft using Google Gen AI
+      responses:
+        '200':
+          description: Bio generated
+  /v1/users/me/primary-profile/bio/polish:
+    post:
+      summary: Polish onboarding bio text using Google Gen AI
+      responses:
+        '200':
+          description: Bio polished
   /v1/users/me/subscription/checkout:
     post:
       summary: Create Stripe monthly subscription checkout session

@@ -43,6 +43,20 @@ usersRouter.patch(
   requireVerifiedEmail,
   usersController.updatePrimaryProfile
 );
+usersRouter.post(
+  '/me/primary-profile/bio/write',
+  requireAuth,
+  requirePrimaryUser,
+  requireVerifiedEmail,
+  usersController.generatePrimaryProfileBio
+);
+usersRouter.post(
+  '/me/primary-profile/bio/polish',
+  requireAuth,
+  requirePrimaryUser,
+  requireVerifiedEmail,
+  usersController.polishPrimaryProfileBio
+);
 // Upload file and set as primary profile (smile) picture in one step
 usersRouter.post(
   '/me/primary-profile/picture',

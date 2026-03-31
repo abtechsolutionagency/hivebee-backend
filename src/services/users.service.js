@@ -17,6 +17,7 @@ import { normalizePlanCode } from '../constants/subscription-plans.js';
 import { mailService } from './mail.service.js';
 import { notificationsService } from './notifications.service.js';
 import { s3Service } from './s3.service.js';
+import { aiBioService } from './ai-bio.service.js';
 import { matchSubmissionsRepository } from '../repositories/match-submissions.repo.js';
 import { Connection } from '../models/connection.model.js';
 
@@ -304,6 +305,16 @@ export const usersService = {
 
     const updated = await usersRepository.updateById(id, payload);
     return ensureFound(updated);
+  },
+
+  async generatePrimaryProfileBio(authUser, payload) {
+    ensurePrimary(authUser);
+    return aiBioService.writeBio(payload);
+  },
+
+  async polishPrimaryProfileBio(authUser, payload) {
+    ensurePrimary(authUser);
+    return aiBioService.polishBio(payload);
   },
 
   async uploadPicture(userId, fileBuffer, mimeType) {
