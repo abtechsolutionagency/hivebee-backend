@@ -308,12 +308,10 @@ export const usersService = {
   },
 
   async generatePrimaryProfileBio(authUser, payload) {
-    ensurePrimary(authUser);
     return aiBioService.writeBio(payload);
   },
 
   async polishPrimaryProfileBio(authUser, payload) {
-    ensurePrimary(authUser);
     return aiBioService.polishBio(payload);
   },
 

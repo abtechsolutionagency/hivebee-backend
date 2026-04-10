@@ -46,14 +46,12 @@ usersRouter.patch(
 usersRouter.post(
   '/me/primary-profile/bio/write',
   requireAuth,
-  requirePrimaryUser,
   requireVerifiedEmail,
   usersController.generatePrimaryProfileBio
 );
 usersRouter.post(
   '/me/primary-profile/bio/polish',
   requireAuth,
-  requirePrimaryUser,
   requireVerifiedEmail,
   usersController.polishPrimaryProfileBio
 );
