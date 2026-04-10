@@ -153,6 +153,8 @@ export const usersRepository = {
   countCandidateProfilesForPrimary: ({ primaryUserId, allowedRoles, filters }) => {
     const query = {
       role: { $in: allowedRoles },
+      profileCompleted: true,
+      emailVerified: true,
       _id: { $ne: toObjectId(primaryUserId) },
       isActive: { $ne: false }
     };
